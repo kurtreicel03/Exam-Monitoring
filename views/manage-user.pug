@@ -1,0 +1,50 @@
+extends base 
+
+block content
+  include _header
+  if success_msg != ''
+      .alert.alert-success.alert-dismissible.fade.show(role='alert')
+        p=success_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+  if warning_msg != ''
+      .alert.alert-warning.alert-dismissible.fade.show(role='alert').text-center
+        h5=warning_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')      
+  .container.mt-5
+  if users.length > 0
+   .container.login-form
+      .mb-3.d-flex
+        a(href="/create-user").btn.btn-outline-success.ms-auto + Add user 
+      include _filter
+      table.table.table-bordered.reports-table
+          thead
+            tr
+              th(scope='col') Name
+              th(scope='col') No. of active report
+              th(scope='col') Status
+              th(scope='col') Role
+
+          tbody
+           each user in users
+            tr
+              td(align="middle")
+                p.report-text=`${user.name.split(' ').map(el=> el.charAt(0).toUpperCase() + el.slice(1)).join(' ')}`
+              td(align="middle")
+                 small=`total report: ${user.total}`
+              td(align="middle")
+                p.report-text=user.status
+              td(align="middle")
+                p.report-text=user.role     
+              td(align="middle")
+                a(href=`/account/${user.id}`).btn.btn-outline-success view
+                a(href=`/account/${user.id}`).btn.btn-outline-success.mx-2 edit
+                form.inline(action=`/users-status/${user.id}`, method="POST")
+                  if user.status === 'active' 
+                    button.btn.btn-outline-success(type="submit") disable account
+                  else 
+                     button.btn.btn-outline-success(type="submit") activate account 
+  else
+    .container.login-form.text-center
+          h1  No record Found
+          a(href="/create-user").btn.btn-outline-success.ms-auto + Add user   
+  include logout          

@@ -1,0 +1,95 @@
+extends base 
+
+block content
+  include _header
+  include modal
+  include delete-modal
+  .container.report-cont 
+    .card.row
+      .col.hr.shadow-sm
+        .row
+          .col.text-center.p-3
+            img(src="../../img/cs.jpg", alt="cs-logo")
+          .col.text-center.pt-5
+            p.tc-text.tc  TOMAS CLAUDIO COLLEGES
+            p.tc-text.ccs COLLEGE OF COMPUTER STUDIES
+            p.tc-text.em  EXAM MONITORING
+          .col.text-center.p-3
+            img(src="../../img/tcc.jpeg", alt="tcc-logo")
+      .col.px-5.hr.shadow-sm
+        .row.mb-4
+          .col
+            table
+             tr
+              td.fw-bold Report Title:
+              td(align="middle").px-5.report-info=report.title 
+          .col
+            table
+             tr
+              td.fw-bold Student level:
+              td(align="middle").px-5.report-info=report.level
+             tr 
+              td.fw-bold Subject:
+              td(align="middle").px-5.report-info=report.subject
+          .col
+            table
+             tr
+              td.fw-bold Date created:
+              td(align="middle").px-5.report-info=`${report.createdAt.toLocaleDateString('en-us',{  year: 'numeric', month: 'numeric',day:"numeric"  })}`
+             tr 
+              td.fw-bold Created by:
+              td(align="middle").px-5.report-info=`${report.user.name.split(' ').map(el=> el.charAt(0).toUpperCase() + el.slice(1)).join(' ')}`
+      .col.hr.shadow-sm
+        .row 
+          .col.px-5
+            p.fw-bold Report description:
+            p=report.description
+      .col.hr.shadow-sm.px-5 
+        p.fw-bold Questionare Report:
+        table.table.table-bordered.reports-table
+           thead 
+            tr
+              th(scope='col') Category
+              th(scope='col') Total Correct
+              th(scope='col') Total Wrong
+              th(scope='col') Total Student
+              th(scope='col') Correct percentage
+              th(scope='col') Difficulty
+           tbody
+            each rep in report.reports
+             tr
+              td(align="middle")
+                p=rep.category
+              td(align="middle")
+                p=rep.correct
+              td(align="middle")
+                p=rep.wrong
+              td(align="middle")
+                p=rep.total
+              td(align="middle")
+                p=`${rep.correctPercentage.toFixed(2)}%`
+              td(align="middle")
+                p=rep.difficulty             
+      .col.hr.shadow-sm.px-5
+        p.fw-bold Report Findings:
+          each reps in report.reports
+            case reps.difficulty
+              when 'Difficult'
+                p=`The exam monitoring system finds that the ${report.level} students having a difficult time answering ${reps.category.toLowerCase()} category in ${report.subject} subject with only ${reps.correctPercentage.toFixed(2)}% correct percentage`
+              when 'Hard'
+               p=`The exam monitoring system finds that the ${report.level} students having a hard time answering ${reps.category.toLowerCase()} category in ${report.subject} subject with only ${reps.correctPercentage.toFixed(2)}% correct percentage`
+              when 'Medium'
+                 p=`The exam monitoring system finds that the ${report.level} students have a great performance answering ${reps.category.toLowerCase()} category in ${report.subject} subject with ${reps.correctPercentage.toFixed(2)}% correct percentage`
+              when 'Easy'
+                 p=`The exam monitoring system finds that the ${report.level} students have a best performance answering  ${reps.category.toLowerCase()} category in ${report.subject} subject with ${reps.correctPercentage.toFixed(2)}% correct percentage`  
+            
+      .col.p-4.d-flex.justify-content-around
+        a(href=`/edit-report/${report._id.toString()}`).btn.btn-outline-success Edit Report
+        //- button.btn.btn-outline-success(type='button' data-bs-toggle='modal' data-bs-target='#exampleModal') Export Report
+        button.btn.btn-outline-success(type='button' data-bs-toggle='modal' data-bs-target='#deleteModal') Delete Report       
+          
+
+             
+
+
+                       

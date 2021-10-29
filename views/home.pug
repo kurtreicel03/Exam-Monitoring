@@ -1,0 +1,68 @@
+extends base 
+
+block content
+  include _header
+  if error_msg != ''
+      .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+        p=error_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+  if success_msg != ''
+      .alert.alert-success.alert-dismissible.fade.show.text-center(role='alert')
+        h4=success_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+  if warning_msg != ''
+      .alert.alert-warning.alert-dismissible.fade.show.text-center(role='alert')
+        h5=warning_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')            
+  .container.mt-5.d-flex.justify-content-between
+    h2=`Welcome ${user.name.split(' ')[0]}`
+    if role === 'admin'
+      a(href="/create").btn.btn-outline-success  + Add report     
+  if reports.length > 0
+   .container.table-cont
+      include _filter    
+      table.table.table-bordered.reports-table
+          thead 
+            tr
+              th(scope='col') Report Title
+              th(scope='col') Student Level
+              th(scope='col') Report Subject
+              th(scope='col') Report Description
+              th(scope='col') Created at
+              if role === 'admin'
+                th(scope='col') Created by 
+          tbody
+           each report in reports
+            tr
+              td(align="middle")
+                p.report-text=`${report.title.split('')[0].toUpperCase()}${report.title.split('').slice(1).join('')}`
+              td(align="middle")
+                p=`${report.level.charAt(0).toUpperCase()}${report.level.slice(1)}`
+              td(align="middle")
+                small=`${report.subject}`
+              td(align="middle")
+                small=`${report.description}`       
+              td(align="middle")
+               .br
+                 small=`created at: ${report.createdAt.toLocaleDateString('en-us',{  year: 'numeric', month: 'numeric',day:"numeric"  })}`
+               if report.updatedAt
+                .br
+                 small=`updated at: ${report.createdAt.toLocaleDateString('en-us',{  year: 'numeric', month: 'numeric',day:"numeric"  })}`  
+              if role === 'admin'
+               td(align="middle")
+                p=`${report.user.name.split(' ').map(el=> el.charAt(0).toUpperCase() + el.slice(1)).join(' ')}` 
+              td(align="middle")
+                a(href=`/report/${report._id.toString()}`).btn.btn-outline-success view
+                a(href=`/edit-report/${report._id.toString()}`).btn.btn-outline-success.mx-2 edit
+                button.btn.btn-outline-success(type='button' data-bs-toggle='modal' data-bs-target='#deleteModal') delete
+                include delete-modal
+
+  else
+    .container.login-form.text-center
+        if role === 'admin'
+          h1  No record Found
+        else 
+          h1  You don't have any reports.
+          a.btn.btn-outline-success(href="/create") create report +  
+          
+  include logout         

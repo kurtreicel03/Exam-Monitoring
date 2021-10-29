@@ -1,0 +1,40 @@
+extends base
+block content
+ nav.navbar.navbar-expand-lg.navbar-dark.bg-success
+    .container-fluid
+        a.navbar-brand(href=`${user ? '/home': '/'}`) EXAM MONITORING
+        button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent' aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation')
+            span.navbar-toggler-icon
+        #navbarSupportedContent.collapse.navbar-collapse
+            ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                    li.nav-item
+                        a.nav-link(href='/' class=`${path === 'signup' ? '' : 'active'}`) Login
+                    li.nav-item
+                        a.nav-link(href='/signup' class=`${path === 'signup' ? 'active' : ''}`) Sign Up
+ .container.login-form
+    if errors
+     each error in errors
+      .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+        p=error.msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+    if success_msg != ''
+      .alert.alert-success.alert-dismissible.fade.show(role='alert')
+        p=success_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+    if error_msg != ''
+      .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+        p=error_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')    
+    
+    form(action="/" method="POST")
+        .mb-3
+            label.form-label(for='email') Email address
+            input#email.form-control(type='email' name="email"  value=`${typeof email != 'undefined' ? email : ''}`)
+            #emailHelp.form-text We&apos;ll never share your email with anyone else.
+        .mb-3 
+            label.form-label(for='password') Password
+            input#password.form-control(type='password' name="password" value=`${typeof password != 'undefined' ? password : ''}`)
+        .mb-3
+            small 
+              a(href="/forgot-password") Forgot Password ?     
+        button.btn.btn-outline-success(type="submit") Login

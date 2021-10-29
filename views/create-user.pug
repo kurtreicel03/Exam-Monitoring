@@ -1,0 +1,26 @@
+extends base
+
+block content 
+    include _header
+    .container.login-form
+     if errors
+      each error in errors
+       .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+        p=error.msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+     .mb-3 
+        h2 Create User   
+     form(action="/create-user" method="POST")
+        .mb-3
+            label.form-label(for='name') User Full Name
+            input#name.form-control(type='text' name="name" value=`${typeof name != 'undefined' ? name : ''}`)
+        .mb-3
+            label.form-label(for='eemail') User Email address
+            input#name.form-control(type='email' name="email" value=`${typeof email != 'undefined' ? email : ''}`)
+        .mb-3
+            label.form-label(for='password') User Password
+            input#password.form-control(type='password' name="password" value=`${typeof password != 'undefined' ? password : ''}`)
+        .mb-3
+            label.form-label(for='confirmPassword') User Confirm password
+            input#confirmPassword.form-control(type='password' name="passwordConfirm" value=`${typeof passwordConfirm != 'undefined' ? passwordConfirm : ''}` )    
+        button.btn.btn-success(type='submit') Add user

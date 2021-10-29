@@ -1,0 +1,11 @@
+#deleteModal.modal.fade(tabindex='-1' aria-labelledby='deleteModalLabel' aria-hidden='true')
+  .modal-dialog
+    .modal-content
+     .modal-header
+        h6#deleteModalLabel.modal-title Are you sure you want to delete this report?
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+     .modal-body.d-flex.justify-content-around
+        buttonbtn.btn.btn-outline-secondary(type="button" data-bs-dismiss="modal") X cancel
+        form.inline(action=`/delete-report/${report._id.toString()}`, method="POST") 
+            button.btn.btn-outline-danger(type="submit") Delete Report
+     

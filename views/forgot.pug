@@ -1,0 +1,17 @@
+extends base 
+
+block content
+ nav.navbar.navbar-expand-lg.navbar-dark.bg-success
+        .container-fluid
+            a.navbar-brand(href='/') EXAM MONITORING 
+ .container.login-form
+    h3 Please provide email to reset password
+    if error_msg != ''
+      .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+        p=error_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close') 
+    form(action="/forgot-password" method="POST")
+        .mb-3
+            label.form-label(for='email') Email address
+            input#email.form-control(type='email' name="email"  value=`${typeof email != 'undefined' ? email : ''}`)   
+        button.btn.btn-success(type="submit") Submit

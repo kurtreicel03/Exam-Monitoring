@@ -1,0 +1,7 @@
+.mb-3.d-flex.justify-content-between 
+        form.search-bar 
+          input.search-input(type="text", name="search" placeholder=`SEARCH BY ${path === 'users' ? 'NAME' : 'TITLE'}`)  
+        select#sort(name="sort")
+          option(selected) Sort By:
+          option(value="newest") Newest     
+          option(value="oldest") Oldest 

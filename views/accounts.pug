@@ -1,0 +1,47 @@
+extends base 
+
+
+
+block content
+    include _header
+    if success_msg != ''
+      .alert.alert-success.alert-dismissible.fade.show.text-center(role='alert')
+        h4=success_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close') 
+    .container.profile-cont
+        h3=`${path === 'my-account' ? 'My' : user.name.split(' ')[0] + "'s"} Profile`
+        .card
+            .card-header.text-center
+             img(src="../../img/default.jpg", alt="img")
+            .card-body.profile-info
+             .mb-3.text-end
+                a(href=`/change-password/${user._id.toString()}`).btn.btn-outline-success Change Password  
+             form(action=`/account/${user._id.toString()}` method="POST") 
+              .mb-3 
+                label.form-label(for='name') Name:
+                input#name.form-control(type='text' name="name" value=`${user.name}`)
+              .mb-3 
+                label.form-label(for='email') Email:
+                input#name.form-control(type='text' name="email" value=`${user.email}`)
+              fieldset(disabled)   
+               .mb-3 
+                 label.form-label(for='total') Total Active Report:
+                 input#total.form-control(type='number' name="total" value=`${total}`)
+               .mb-3 
+                label.form-label(for='status') Status
+                input#status.form-control(type='text' name="status" value=`${user.status}`)
+              if user.role === 'admin'  
+               .mb-5 
+                label.form-label(for='role') Role:
+                input#role.form-control(type='text' name="role" value=`${user.role}`)
+              .mb-3.d-flex.justify-content-around
+               button(type="submit").btn.btn-outline-success Update Account
+              
+        
+    include logout
+
+
+
+
+
+                
