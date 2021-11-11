@@ -60,7 +60,7 @@ exports.loginPost = async (req, res, next) => {
     }
     const user = await User.findOne({ email });
     if (!user) {
-      req.flash('error_msg', 'No user exisist with that email, please sign up');
+      req.flash('error_msg', 'No user exist with that email, please sign up');
       res.redirect('/');
       return;
     }
