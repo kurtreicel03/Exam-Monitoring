@@ -22,7 +22,7 @@ block content
             table
              tr
               td.fw-bold Report Title:
-              td(align="middle").px-5.report-info=report.title 
+              td(align="middle").px-5.report-info=`${report.title.split(' ').map(el=> el.charAt(0).toUpperCase() + el.slice(1)).join(' ')}`
           .col
             table
              tr
@@ -30,7 +30,7 @@ block content
               td(align="middle").px-5.report-info=report.level
              tr 
               td.fw-bold Subject:
-              td(align="middle").px-5.report-info=report.subject
+              td(align="middle").px-5.report-info=`${report.subject.toUpperCase()}`
           .col
             table
              tr
