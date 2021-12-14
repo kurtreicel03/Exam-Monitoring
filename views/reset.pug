@@ -11,7 +11,7 @@ block content
       .alert.alert-danger.alert-dismissible.fade.show(role='alert')
         p=error.msg
         button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
-    form(action=`/reset-password/${email}` method="POST")
+    form(action=`/reset-password/${hashToken}` method="POST")
         .mb-3
             label.form-label(for='password') Password
             input#password.form-control(type='password' name="password" value=`${typeof password != 'undefined' ? password : ''}`)

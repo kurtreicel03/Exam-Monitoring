@@ -12,6 +12,10 @@ const {
 router.route('/home').get(ensureAuthenticated, indexController.home);
 
 router
+  .route('/verify/:hashToken')
+  .get(authController.verifyUser);
+
+router
   .route('/')
   .get(forwardAuthenticated, authController.login)
   .post(authController.loginPost);
@@ -28,7 +32,7 @@ router
   .post(authController.forgotPost);
 
 router
-  .route('/reset-password/:email')
+  .route('/reset-password/:hashToken')
   .get(authController.reset)
   .post(authController.resetPost);
 
@@ -74,5 +78,7 @@ router
     authController.restrict,
     indexController.manageReports
   );
+
+router.route('/export-report/:id').get(indexController.exportReport)
 
 module.exports = router;

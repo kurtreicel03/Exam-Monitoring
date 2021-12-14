@@ -1,8 +1,13 @@
 const User = require('../models/userModel');
 const Report = require('../models/reportModel');
+const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 const {
   default: strictTransportSecurity,
 } = require('helmet/dist/middlewares/strict-transport-security');
+const { fontSize } = require('pdfkit');
+
 
 const generateReport = (category, correct, wrong) => {
   let reports = [];
@@ -18,6 +23,7 @@ const generateReport = (category, correct, wrong) => {
         total: corrects[i] + wrongs[i],
       };
       report.correctPercentage = (100 * corrects[i]) / report.total;
+      report.wrongPercentage = (100 * wrongs[i]) / report.total;
 
       if (report.correctPercentage <= 25) {
         report.difficulty = 'Difficult';
@@ -37,13 +43,16 @@ const generateReport = (category, correct, wrong) => {
       reports.push(report);
     });
   } else {
+
     report = {
       category,
       correct,
       wrong,
       total: +correct + +wrong,
     };
+
     report.correctPercentage = (100 * +correct) / report.total;
+    report.wrongPercentage = (100 * +wrong) / report.total;
 
     if (report.correctPercentage <= 25) {
       report.difficulty = 'Difficult';
@@ -181,6 +190,7 @@ exports.createPost = async (req, res) => {
   }
 
   const reports = generateReport(category, correct, wrong);
+  
   const newReport = await Report.create({
     title: title.toLowerCase(),
     level,
@@ -189,6 +199,7 @@ exports.createPost = async (req, res) => {
     reports,
     user,
   });
+  
   req.flash(
     'success_msg',
     'Report created you can look at your reports section'
@@ -268,6 +279,7 @@ exports.editReport = async (req, res) => {
     console.log(error);
   }
 };
+
 
 exports.editReportPost = async (req, res) => {
   try {
@@ -413,14 +425,270 @@ exports.report = async (req, res) => {
       'user',
       'name'
     );
+    
+
+    const percentage = report.reports.map(rep => {
+      return rep.correctPercentage;
+    })
+
+    const most = Math.max(...percentage);
+    const least = Math.min(...percentage);
+
+
+    const mostCorrect = report.reports.find(rep => rep.correctPercentage === most);
+    
+    const leastCorrect = report.reports.find(rep => rep.correctPercentage === least);
+  
+   
+
     res.render('report', {
       title: 'Report',
       path: 'home',
       role: req.user.role,
       user: req.user,
       report,
+      mostCorrect,
+      leastCorrect,
     });
   } catch (error) {
     console.log(error);
   }
 };
+
+function generateHr(doc, y) {
+  doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(20, y).lineTo(700, y).stroke();
+}
+
+function generateTableRow(doc, y, c1, c2, c3, c4, c5,c6) {
+  doc
+    .font('Helvetica')
+    .fontSize(11)
+    .text(c1, 50, y)
+    .text(c2, 150, y)
+    .text(c3, 250, y)
+    .text(c4, 350, y)
+    .text(c5, 450, y)
+    .text(c6, 550, y);
+}
+
+
+function generateFindings(doc,findings,position){
+  doc.fontSize(11).font('Helvetica').text(findings,50,position);
+}
+
+
+exports.exportReport =  async (req, res) => {
+  try {
+    const {id} = req.params;
+   
+    const invoiceName = `invoice-${id}.pdf`;
+    const invoicePath = path.join('data', 'invoice', invoiceName);
+
+    const report = await Report.findById({ _id: id }).populate('user', 'name');
+    const percentage = report.reports.map(rep => {
+      return rep.correctPercentage;
+    });
+
+    const most = Math.max(...percentage);
+    const least = Math.min(...percentage);
+
+    const mostCorrect = report.reports.find(
+      rep => rep.correctPercentage === most
+    );
+
+    const leastCorrect = report.reports.find(
+      rep => rep.correctPercentage === least
+    );
+    
+    
+    if(!report){
+      req.flash('error_msg', ' Oops! Something Went Wrong');
+      res.redirect(`/report/${id}`)
+  }
+
+    const pdfDoc = new PDFDocument({ margin: 50, size: 'B4' });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="'${invoiceName}'"`);
+
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
+
+    pdfDoc
+      .image('images/cs.jpg', 50, 45, { width: 80 })
+      .fontSize(17)
+      .font('Times-Roman')
+      .text('TOMAS CLAUDIO COLLEGES',220,50)
+      .fontSize(15)
+      .text('COLLEGE OF COMPUTER STUDIES',215,70)
+      .fontSize(14)
+      .text("EXAM MONITORING",280,90)
+      .image('images/tcc.jpeg',550,45, { width: 80 });
+
+
+       generateHr(pdfDoc, 150);
+
+       pdfDoc
+         .fontSize(11)
+         .font('Helvetica-Bold')
+         .text('Report Title:', 50, 160)
+         .font('Helvetica')
+         .underline(117, 170, 120, 2, { color: 'black' })
+         .text(`${report.title.toUpperCase()}`, 120, 160)
+         .font('Helvetica-Bold')
+         .underline(340, 170, 70, 2, { color: 'black' })
+         .text('Student Level:', 260, 160)
+         .font('Helvetica')
+         .text(`   ${report.level}`, 340, 160)
+         .font('Helvetica-Bold')
+         .underline(517, 170, 80, 2, { color: 'black' })
+         .text('Created At:', 460, 160)
+         .font('Helvetica')
+         .text(
+           `   ${report.createdAt.toLocaleDateString('en-us', {
+             year: 'numeric',
+             month: 'numeric',
+             day: 'numeric',
+           })}`,
+           520,
+           160
+         )
+         .font('Helvetica-Bold')
+         .underline(340, 200, 70, 2, { color: 'black' })
+         .text('Subject:', 260, 190)
+         .font('Helvetica')
+         .text(`${report.subject.toUpperCase()}`,352,190)
+         .font('Helvetica-Bold')
+         .underline(518, 200, 80, 2, { color: 'black' })
+         .text('Created By:', 460, 190)
+         .font('Helvetica')
+         .text(`${report.user.name.split(' ').map(el=> el.charAt(0).toUpperCase() + el.slice(1)).join(' ')}`,528,190);
+
+
+    generateHr(pdfDoc, 210);
+    
+    pdfDoc
+      .fontSize(12)
+      .font('Helvetica-Bold')
+      .text('Questionare Reports:', 50, 220);
+    let i,
+      invoiceTableTop = 250;
+
+       generateTableRow(
+         pdfDoc,
+         invoiceTableTop,
+         'Category',
+         'Correct',
+         'Wrong',
+         'Student',
+         'Percentage',
+         'Difficulty'
+       );
+
+       
+       pdfDoc.strokeColor('#000')
+         .lineWidth(2)
+         .moveTo(20,270)
+         .lineTo(700,270)
+         .stroke();
+
+    for (i = 0; i < report.reports.length; i++) {
+      const item = report.reports[i];
+      const position = invoiceTableTop + (i + 1) * 30;
+      generateTableRow(
+        pdfDoc,
+        position,
+        item.category,
+        item.correct,
+        item.wrong,
+        item.total,
+        `${item.correctPercentage.toFixed(2)}%`,
+        item.difficulty,
+      );
+      generateHr(pdfDoc, position + 20);
+    }
+
+    pdfDoc
+      .fontSize(12)
+      .font('Helvetica-Bold')
+      .text('Report Findings:', 50, 380)
+      .fontSize(11)
+      .font('Helvetica')
+      .text(
+        `The questionare category who got the most correct is ${
+          mostCorrect.category
+        } with ${mostCorrect.correctPercentage.toFixed(2)} % Corrects.`,
+        50,
+        400
+      )
+      .text(
+        `The questionare category who got the most error is ${
+          leastCorrect.category
+        } with ${leastCorrect.correctPercentage.toFixed(2)} %  Errors.`
+      ,50,428);
+
+
+    
+    let reportPosition = 430;
+    
+
+
+
+    for (i = 0; i < report.reports.length; i++){
+      const reps = report.reports[i]
+      const position = reportPosition + (i + 1) * 30;
+          if (reps.difficulty === 'Difficult') {
+           generateFindings(pdfDoc,
+             `The exam monitoring system finds that the ${
+               report.level
+             } students having a difficult time answering ${reps.category.toLowerCase()} category in ${
+               report.subject
+             } subject with only ${reps.correctPercentage.toFixed(
+               2
+             )}% correct percentage.`,position
+           );
+          }else if(reps.difficulty === 'Hard'){
+            generateFindings(
+              pdfDoc,
+              `The exam monitoring system finds that the ${
+                report.level
+              } students having a hard time answering ${reps.category.toLowerCase()} category in ${
+                report.subject
+              } subject with only ${reps.correctPercentage.toFixed(
+                2
+              )}% correct percentage.`,
+              position
+            );
+          }else if(reps.difficulty === 'Medium'){
+            generateFindings(
+              pdfDoc,
+              `The exam monitoring system finds that the ${
+                report.level
+              } students have a great performance answering ${reps.category.toLowerCase()} category in ${
+                report.subject
+              } subject with ${reps.correctPercentage.toFixed(
+                2
+              )}% correct percentage.`,
+              position
+            );
+          }else if(reps.difficulty === 'Easy'){
+            generateFindings(
+              pdfDoc,
+              `The exam monitoring system finds that the ${
+                report.level
+              } students have a best performance answering  ${reps.category.toLowerCase()} category in ${
+                report.subject
+              } subject with ${reps.correctPercentage.toFixed(
+                2
+              )}% correct percentage.`,
+              position
+            );
+          }
+    }
+
+    pdfDoc.end();
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+

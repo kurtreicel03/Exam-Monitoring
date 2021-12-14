@@ -89,3 +89,36 @@ img {
   margin-bottom: 1rem;
   margin-top: 1rem;
 }
+#datasets-example-4 {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+#datasets-example-4 .column {
+  height: 300px;
+  max-width: 700px;
+}
+#datasets-example-4 .legend {
+  flex-shrink: 3;
+}
+
+.green{
+  height:30px;
+  width:30px;
+  border-radius:50px;
+  border: solid 0.5px gray;
+  background-color: #aea;
+}
+
+.red{
+  height:30px;
+  width:30px;
+  border-radius:50px;
+  border: solid 0.5px gray;
+  background-color: rgba(230, 30, 30, 0.6);
+}
+
+

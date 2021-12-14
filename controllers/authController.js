@@ -1,6 +1,8 @@
 const User = require('../models/userModel');
 const passport = require('passport');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const sendEmail = require('../config/email');
 
 exports.restrict = async (req, res, next) => {
   try {
@@ -61,6 +63,15 @@ exports.loginPost = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user) {
       req.flash('error_msg', 'No user exist with that email, please sign up');
+      res.redirect('/');
+      return;
+    }
+
+    if (!user.verified) {
+      req.flash(
+        'error_msg',
+        'Please verify your email, we sent an verification token to your email'
+      );
       res.redirect('/');
       return;
     }
@@ -152,13 +163,17 @@ exports.createUserPost = async (req, res) => {
       password,
       passwordConfirm,
     });
-    req.flash('success_msg', 'User successfully added');
+
+    req.flash('success_msg', 'Verify your email first before login');
     res.redirect('/users');
   } catch (error) {}
 };
 
 exports.signupPost = async (req, res) => {
   try {
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashToken = crypto.createHash('sha256').update(token).digest('hex');
+
     const { name, email, password, passwordConfirm } = req.body;
 
     let errors = [];
@@ -198,13 +213,46 @@ exports.signupPost = async (req, res) => {
       email,
       password,
       passwordConfirm,
+      verificationToken: hashToken,
     });
 
-    req.flash('success_msg', 'You are now registered and can log in');
+    const html = `<div style="text-align:center; font-family: Arial, sans-serif;">
+    <h2>THANK YOU FOR SIGNING UP TO TCC EXAM MONITORING</h2>
+    <h3> PLEASE VERIFY YOUR EMAIL FIRST BEFORE LOGIN </h3>
+    <a style="background-color: #4CAF50; border: none; color: white;   padding: 15px 32px;  text-align: center; text-decoration: none; display: inline-block;  font-size: 16px;" href="localhost:3000/verify/${hashToken}">VERIFY</a></div>`;
+
+    await sendEmail({
+      email: email,
+      subject: 'Thanks For signing up',
+      message:
+        'SIGN UP SUCCESSFULL PLEASE VERIFY YOUR EMAIL FIRST BEFORE LOGIN.',
+      html,
+    });
+
+    req.flash(
+      'success_msg',
+      'You are now registered please verify your email before login'
+    );
     res.redirect('/');
   } catch (error) {
     console.log(error);
   }
+};
+
+exports.verifyUser = async (req, res) => {
+  const { hashToken } = req.params;
+  try{
+    const user = await User.findOne({verificationToken:hashToken});
+    console.log(user)
+    user.verified = true;
+    user.verificationToken = undefined;
+    await user.save({validateBeforeSave:false});
+    req.flash('success_msg', 'Account verified you can now login')
+    res.redirect('/');
+  }catch(error){
+    console.log(error)
+  }
+  
 };
 
 exports.notFound = (req, res) => {
@@ -229,7 +277,13 @@ exports.forgot = (req, res) => {
 
 exports.forgotPost = async (req, res) => {
   try {
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashToken = crypto.createHash('sha256').update(token).digest('hex');
     const inputEmail = req.body.email;
+    const html = `<div style="text-align:center; font-family: Arial, sans-serif;">
+    <h2>RESET PASSWORD </h2>
+    <p>Clink the link to change your password.</p>
+    <a style="background-color: #4CAF50; border: none; color: white;   padding: 15px 32px;  text-align: center; text-decoration: none; display: inline-block;  font-size: 16px;" href="localhost:3000/reset-password/${hashToken}">VERIFY</a></div>`;
 
     if (!inputEmail) {
       req.flash('error_msg', 'Please input your Email');
@@ -237,12 +291,23 @@ exports.forgotPost = async (req, res) => {
     }
 
     const email = await User.findOne({ email: inputEmail });
+    console.log(email);
     if (!email) {
       req.flash('error_msg', 'No user found with that email');
       res.redirect('/forgot-password');
     }
-    const userEmail = encodeURIComponent(inputEmail);
-    res.redirect(`/reset-password/${userEmail}`);
+
+    email.passwordChangeToken = hashToken;
+    await email.save({validateBeforeSave:false});
+
+    await sendEmail({
+      email:email.email,
+      subject: 'Reset password',
+      html
+    })
+
+    req.flash('success_msg', 'Please check your email, we sent an email token to reset your password.');
+    res.redirect(`/forgot-password`);
   } catch (error) {
     console.log(error);
   }
@@ -250,10 +315,10 @@ exports.forgotPost = async (req, res) => {
 
 exports.reset = (req, res) => {
   try {
-    const { email } = req.params;
+    const { hashToken } = req.params;
     res.render('reset', {
       title: 'Reset Password',
-      email,
+      hashToken
     });
   } catch (error) {
     console.log(error);
@@ -262,22 +327,22 @@ exports.reset = (req, res) => {
 
 exports.resetPost = async (req, res) => {
   try {
-    const { email } = req.params;
+    const { hashToken } = req.params;
     const { password, passwordConfirm } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ passwordChangeToken:hashToken });
     if (!password || !passwordConfirm) {
       req.flash('error_msg', 'Please fill up all fields to proceed');
-      res.redirect(`/reset-password/${email}`);
+      res.redirect(`/reset-password/${hashToken}`);
     }
-
+    
     if (password !== passwordConfirm) {
       req.flash('error_msg', 'Password does not match');
-      res.redirect(`/reset-password/${email}`);
+      res.redirect(`/reset-password/${hashToken}`);
     }
 
     user.password = password;
-    user.passwordConfirm = passwordConfirm;
     user.passwordChangeAt = Date.now();
+    user.passwordChangeToken = undefined;
 
     await user.save({ validateBeforeSave: false });
     req.flash('success_msg', 'Password update successful, you can now login');

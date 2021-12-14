@@ -24,6 +24,7 @@ const reportSchema = new mongoose.Schema({
       wrong: Number,
       total: Number,
       correctPercentage: Number,
+      wrongPerecentage:Number,
       difficulty: String,
     },
   ],

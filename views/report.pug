@@ -72,6 +72,8 @@ block content
                 p=rep.difficulty             
       .col.hr.shadow-sm.px-5
         p.fw-bold Report Findings:
+        p=`The questionare category who got the most correct is ${mostCorrect.category} with ${mostCorrect.correctPercentage.toFixed(2)} % Corrects.`
+        p=`The questionare category who got the most error is ${leastCorrect.category} with ${leastCorrect.correctPercentage.toFixed(2)} %  Errors.`
           each reps in report.reports
             case reps.difficulty
               when 'Difficult'
@@ -82,10 +84,32 @@ block content
                  p=`The exam monitoring system finds that the ${report.level} students have a great performance answering ${reps.category.toLowerCase()} category in ${report.subject} subject with ${reps.correctPercentage.toFixed(2)}% correct percentage`
               when 'Easy'
                  p=`The exam monitoring system finds that the ${report.level} students have a best performance answering  ${reps.category.toLowerCase()} category in ${report.subject} subject with ${reps.correctPercentage.toFixed(2)}% correct percentage`  
-            
+      .col.hr.shadow-sm.px-5
+        .new
+          p.fw-bold Report Graph:
+          .grapp.row
+            .col.d-flex
+              .green.mx-3
+              p Correct Percentage
+            .col.d-flex
+              .red.mx-3
+              p Wrong Percentage
+          
+        #datasets-example-4
+          table.charts-css.column.multiple.show-labels.data-spacing-5.datasets-spacing-1.legend.legend-square.mb-2
+            tbody
+              each rep in report.reports
+                tr
+                  th(scope='row')=`${rep.category.toUpperCase()} ` 
+                  td(style=`--size:calc( ${rep.correct/rep.total} ); --color:#aea;`)
+                    span.data=`${rep.correctPercentage.toFixed(2)}% `   
+                  td(style=`--size:calc( ${rep.wrong/rep.total}); --color: rgba(230, 30, 30, 0.6);`)
+                    -const wrongp =( 100 * rep.wrong) / rep.total;
+                     span.data=`${wrongp.toFixed(2)}% ` 
       .col.p-4.d-flex.justify-content-around
         a(href=`/edit-report/${report._id.toString()}`).btn.btn-outline-success Edit Report
-        //- button.btn.btn-outline-success(type='button' data-bs-toggle='modal' data-bs-target='#exampleModal') Export Report
+        a(href=`/export-report/${report._id.toString()}`).btn.btn-outline-success Export Report
+    
         button.btn.btn-outline-success(type='button' data-bs-toggle='modal' data-bs-target='#deleteModal') Delete Report       
           
 

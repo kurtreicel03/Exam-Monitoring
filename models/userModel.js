@@ -33,7 +33,14 @@ const userScehama = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
   passwordChangeAt: Date,
+  passwordChangeToken: String,
+  verificationToken: String,
+  
 });
 
 userScehama.pre('save', async function (next) {

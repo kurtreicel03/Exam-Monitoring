@@ -33,9 +33,19 @@ if (sort) {
 if (addTable) {
   const markup = `
     <tr>
-    <td><input type="text" class="form-control category" name="category"></td>
-    <td><input type="number" class="form-control correct" name="correct"></td>
-    <td><input type="number" class="form-control wrong" name="wrong"></td>
+      <td>
+        <select class="form-select" name="category" id="category">
+          <option value="" selected>Categories</option>
+          <option value="True Or False">True or False</option>
+          <option value="Identification">Identification</option>
+          <option value="Multiple Choice">Multiple Choice</option>
+          <option value="Fill in Blanks">Fill in Blanks</option>
+          <option value="Enumeration">Enumeration</option>
+          <option value="Matching Type">Matching Type</option>
+        </select>
+      </td>
+      <td><input type="number" class="form-control correct" name="correct"></td>
+      <td><input type="number" class="form-control wrong" name="wrong"></td>
     </tr>`;
 
   addTable.addEventListener('click', e => {

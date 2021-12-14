@@ -10,6 +10,10 @@ block content
       .alert.alert-danger.alert-dismissible.fade.show(role='alert')
         p=error_msg
         button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close') 
+    if success_msg != ''
+      .alert.alert-success.alert-dismissible.fade.show(role='alert')
+        p=success_msg
+        button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')   
     form(action="/forgot-password" method="POST")
         .mb-3
             label.form-label(for='email') Email address

@@ -17,7 +17,17 @@ block content
    .row
     .col.mb-3
         label(for="title") Title
-        input#title.form-control(type="text", name="title" placeholder="INPUT TITLE HERE")
+         select.form-select#title(name="title")
+          option(value="" selected) Title
+          option(value="1st Quarter exam") 1st Quarter Exam
+          option(value="2nd Quarter exam") 2nd Quarter Exam
+          option(value="3rd Quarter exam") 3rd Quarter Exam
+          option(value="4th Quarter exam") 4th Quarter Exam
+          option(value="Prelim exam") Prelim Exam
+          option(value="Midterm exam") Midterm Exam
+          option(value="Semi-final exam") Semi-final Exam
+          option(value="Finals exam") Finals Exam
+        
     .col.mb-3
         label(for="student-level") Student Level
         select.form-select#student-level(name="level")
@@ -42,7 +52,13 @@ block content
            
     .col.mb-3
           label(for="subject") Subject
-          input#subject.form-control(type="text", name="subject" placeholder="ex: English 101") 
+          select.form-select#subject(name="subject")
+            option(value="" selected) Subject
+            option(value="English") English
+            option(value="Filipino") Filipino
+            option(value="Math") Math
+            option(value="Computer") Computer
+            option(value="PE") P.E
    .mb-3       
     label(for="description") Description
     textarea#description.form-control(type="text", name="description" placeholder="Report description")
@@ -60,7 +76,14 @@ block content
     tbody
       tr
        td 
-        input.form-control.category(type="text" name="category") 
+        select.form-select#category(name="category")
+            option(value="" selected) Categories
+            option(value="True Or False") True Or False
+            option(value="Identification") Identification
+            option(value="Multiple Choice") Multiple Choice
+            option(value="Matching Type") Matching Type
+            option(value="Enumeration") Enumeration
+            oprtion(value="Fill in Blanks") Fill in Blanks
        td
         input.form-control.correct(type="number" name="correct") 
        td 
